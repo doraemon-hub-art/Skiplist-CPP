@@ -18,7 +18,11 @@
 std::mutex mtx;     // mutex for critical section
 std::string delimiter = ":";
 
+<<<<<<< HEAD
 //Class template to      - 结点类
+=======
+//Class template to implement node
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V> 
 class Node {
 
@@ -36,6 +40,7 @@ public:
 
     void set_value(V);
     
+<<<<<<< HEAD
 
     Node<K, V> **forward;
     
@@ -53,6 +58,10 @@ level 0:               1:A          2:B         3:C       4:D        5:E     6:F
 
 
 
+=======
+    // Linear array to hold pointers to next node of different level
+    Node<K, V> **forward;
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 
     int node_level;
 
@@ -70,7 +79,11 @@ Node<K, V>::Node(const K k, const V v, int level) {
     // level + 1, because array index is from 0 - level
     this->forward = new Node<K, V>*[level+1];
     
+<<<<<<< HEAD
 	// 初始化用0填充
+=======
+	// Fill forward array with 0(NULL) 
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
     memset(this->forward, 0, sizeof(Node<K, V>*)*(level+1));
 };
 
@@ -88,14 +101,21 @@ template<typename K, typename V>
 V Node<K, V>::get_value() const {
     return value;
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V> 
 void Node<K, V>::set_value(V value) {
     this->value=value;
 };
 
+<<<<<<< HEAD
 
 // Class template for Skip list - 跳表类
+=======
+// Class template for Skip list
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template <typename K, typename V> 
 class SkipList {
 
@@ -117,6 +137,7 @@ private:
     bool is_valid_string(const std::string& str);
 
 private:    
+<<<<<<< HEAD
     // 跳表最大高度
     int _max_level;
 
@@ -135,6 +156,26 @@ private:
 };
 
 // 创建节点
+=======
+    // Maximum level of the skip list 
+    int _max_level;
+
+    // current level of skip list 
+    int _skip_list_level;
+
+    // pointer to header node 
+    Node<K, V> *_header;
+
+    // file operator
+    std::ofstream _file_writer;
+    std::ifstream _file_reader;
+
+    // skiplist current element count
+    int _element_count;
+};
+
+// create new node 
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V>
 Node<K, V>* SkipList<K, V>::create_node(const K k, const V v, int level) {
     Node<K, V> *n = new Node<K, V>(k, v, level);
@@ -142,8 +183,13 @@ Node<K, V>* SkipList<K, V>::create_node(const K k, const V v, int level) {
 }
 
 // Insert given key and value in skip list 
+<<<<<<< HEAD
 // return 1 means element exists  - 1 代表元素存在
 // return 0 means insert successfully - 0 代表插入成功
+=======
+// return 1 means element exists  
+// return 0 means insert successfully
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 /* 
                            +------------+
                            |  insert 50 |
@@ -164,12 +210,16 @@ level 0         1    4   9 10         30   40  | 50 |  60      70       100
                                                +----+
 
 */
+<<<<<<< HEAD
 
 //插入元素
+=======
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V>
 int SkipList<K, V>::insert_element(const K key, const V value) {
     
     mtx.lock();
+<<<<<<< HEAD
     Node<K, V> *current = this->_header;//先拿到头结点
 
     // 创建数组update并进行初始化
@@ -196,12 +246,34 @@ int SkipList<K, V>::insert_element(const K key, const V value) {
 
     // 存在即修改
     // 如果当前结点的key值和待插入节点的key相等，则说明待插入节点值存在，修改该节点的值，这里并没有进行修改。
+=======
+    Node<K, V> *current = this->_header;
+
+    // create update array and initialize it 
+    // update is array which put node that the node->forward[i] should be operated later
+    Node<K, V> *update[_max_level+1];
+    memset(update, 0, sizeof(Node<K, V>*)*(_max_level+1));  
+
+    // start form highest level of skip list 
+    for(int i = _skip_list_level; i >= 0; i--) {
+        while(current->forward[i] != NULL && current->forward[i]->get_key() < key) {
+            current = current->forward[i]; 
+        }
+        update[i] = current;
+    }
+
+    // reached level 0 and forward pointer to right node, which is desired to insert key.
+    current = current->forward[0];
+
+    // if current node have key equal to searched key, we get it
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
     if (current != NULL && current->get_key() == key) {
         std::cout << "key: " << key << ", exists" << std::endl;
         mtx.unlock();
         return 1;
     }
 
+<<<<<<< HEAD
     //如果current结点为null，这就意味着要将该元素应该插入到最后
     //如果current的key值和待插入的key不等，代表我们应该在update[0]和current之间插入该节点。
     if (current == NULL || current->get_key() != key ) {
@@ -210,6 +282,15 @@ int SkipList<K, V>::insert_element(const K key, const V value) {
         int random_level = get_random_level();
 
         // 如果随机出来的层数大于当前的
+=======
+    // if current is NULL that means we have reached to end of the level 
+    // if current's key is not equal to key that means we have to insert node between update[0] and current node 
+    if (current == NULL || current->get_key() != key ) {
+        
+        // Generate a random level for node
+        int random_level = get_random_level();
+
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
         // If random level is greater thar skip list's current level, initialize update value with pointer to header
         if (random_level > _skip_list_level) {
             for (int i = _skip_list_level+1; i < random_level+1; i++) {
@@ -218,10 +299,17 @@ int SkipList<K, V>::insert_element(const K key, const V value) {
             _skip_list_level = random_level;
         }
 
+<<<<<<< HEAD
         // 创建新节点
         Node<K, V>* inserted_node = create_node(key, value, random_level);
         
         // 插入结点
+=======
+        // create new node with random level generated 
+        Node<K, V>* inserted_node = create_node(key, value, random_level);
+        
+        // insert node 
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
         for (int i = 0; i <= random_level; i++) {
             inserted_node->forward[i] = update[i]->forward[i];
             update[i]->forward[i] = inserted_node;
@@ -268,7 +356,11 @@ void SkipList<K, V>::dump_file() {
     return ;
 }
 
+<<<<<<< HEAD
 // Load data from disk - 从磁盘中加载数据
+=======
+// Load data from disk
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V> 
 void SkipList<K, V>::load_file() {
 
@@ -288,7 +380,11 @@ void SkipList<K, V>::load_file() {
     _file_reader.close();
 }
 
+<<<<<<< HEAD
 // 当前跳表元素数量
+=======
+// Get current SkipList size 
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V> 
 int SkipList<K, V>::size() { 
     return _element_count;
@@ -383,7 +479,11 @@ bool SkipList<K, V>::search_element(K key) {
     std::cout << "search_element-----------------" << std::endl;
     Node<K, V> *current = _header;
 
+<<<<<<< HEAD
     // 从左上角开始寻找
+=======
+    // start from highest level of skip list
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
     for (int i = _skip_list_level; i >= 0; i--) {
         while (current->forward[i] && current->forward[i]->get_key() < key) {
             current = current->forward[i];
@@ -403,7 +503,11 @@ bool SkipList<K, V>::search_element(K key) {
     return false;
 }
 
+<<<<<<< HEAD
 // int 有参构造
+=======
+// construct skip list
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V> 
 SkipList<K, V>::SkipList(int max_level) {
 
@@ -411,13 +515,20 @@ SkipList<K, V>::SkipList(int max_level) {
     this->_skip_list_level = 0;
     this->_element_count = 0;
 
+<<<<<<< HEAD
     //创建头节点 并将K与V初始化为NULL
+=======
+    // create header node and initialize key and value to null
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
     K k;
     V v;
     this->_header = new Node<K, V>(k, v, _max_level);
 };
 
+<<<<<<< HEAD
 //析构
+=======
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V> 
 SkipList<K, V>::~SkipList() {
 
@@ -430,7 +541,10 @@ SkipList<K, V>::~SkipList() {
     delete _header;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> cdd2eb16fef9efae838d79e179eedeee41a5c595
 template<typename K, typename V>
 int SkipList<K, V>::get_random_level(){
 
