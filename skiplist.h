@@ -221,7 +221,7 @@ int SkipList<K, V>::insert_element(const K key, const V value) {
     mtx.lock();
 <<<<<<< HEAD
     Node<K, V> *current = this->_header;//先拿到头结点
-
+    //TEST
     // 创建数组update并进行初始化
     // update is array which put node that the node->forward[i] should be operated later
     //update 为结点指针数组
